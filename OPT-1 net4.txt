@@ -1,0 +1,54 @@
+#module_capacity
+1
+
+#number_of_links
+5
+
+#link_id   link_nodeA   link_nodeB  number_of_modules  module_cost
+1 1 2 4 1
+2 1 3 8 1
+3 2 3 8 1
+4 2 4 8 1
+5 3 4 10 1
+
+#number_of_demands
+6
+
+#demand_id   link_nodeA   link_nodeB   demand_volume
+#number_of_paths
+#number_of_links_in_the path   list_of_links
+1 1 2 3
+3
+1 1 
+2 2 3 
+3 2 5 4 
+
+2 1 3 4
+3
+1 2 
+2 1 3 
+3 1 4 5 
+
+3 1 4 5
+2
+2 1 4 
+2 2 5 
+
+4 2 3 2
+3
+1 3 
+2 1 2 
+2 4 5 
+
+5 2 4 3
+3
+1 4 
+2 3 5 
+3 1 2 5 
+
+6 3 4 4
+3
+1 5 
+2 3 4 
+3 2 1 4 
+
