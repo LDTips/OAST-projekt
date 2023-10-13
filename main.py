@@ -98,12 +98,30 @@ def random_flow_allocation(demands):
     return flows
 
 
+def calculate_link_loads(flows, demands, links):
+    loads = {str(i): None for i in range(1, len(demands) + 1)}
+    flows_arr = []
+    demands_arr = []
+    for i in flows.values():
+        flows_arr.extend(i)
+    for i in demands:
+        demands_arr.extend(i.get('paths'))
+
+    for i in range(1, len(links)+1):
+        indexes = [demands_arr.index(j) for j in demands_arr if i in j]
+        load = sum(flows_arr[k] for k in indexes)
+        loads[str(i)] = load
+
+    return loads
+
+
 def main():
     non_complex, demands, links = read_file('OPT-1 net4.txt')
     print("Finished reading")
     print(random_sum(3, 5))
     flows = random_flow_allocation(demands)
     print("Generated random flow allocation")
+    calculate_link_loads(flows, demands, links)
 
 
 if __name__ == "__main__":
