@@ -9,7 +9,7 @@ def process_demands(f_arr, index):
     while True:
         try:
             current = next(arr_iter).split(' ')
-            if '#' in current or current == '':  # Check if another section is not present
+            if '#' in current[0] or current[0] == '':  # Check if another section is not present
                 break
         except StopIteration:  # Raised if iterator is exhausted
             break
@@ -40,7 +40,23 @@ def process_demands(f_arr, index):
 
 
 def process_links(f_arr, index):
-    return "Processed links..."
+    links = []
+    f_arr = f_arr[index+1:]  # f_arr[index] is the definition of the section
+    arr_iter = iter(f_arr)  # Easier to do with iterator rather than classic for loop
+
+    while True:
+        current = next(arr_iter).split(' ')
+        if current[0] == '':
+            break
+        links.append(
+            {
+                'link': (current[1], current[2]),
+                'module_count': current[3],
+                'module_cost': current[4]
+            }
+        )
+
+    return links
 
 
 def read_file(filepath):
