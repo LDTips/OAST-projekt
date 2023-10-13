@@ -1,3 +1,5 @@
+import random
+import math
 
 
 def process_demands(f_arr, index):
@@ -30,9 +32,9 @@ def process_demands(f_arr, index):
 
         demands.append(
             {
-                "link": link,
+                "demand": link,
                 "paths": paths,
-                "h_d": h_d
+                "h_d": int(h_d)
             }
         )
 
@@ -78,9 +80,30 @@ def read_file(filepath):
     return non_complex, demands, links
 
 
+def random_sum(n, total):
+    rand_floats = [random.random() for _ in range(n)]
+    rand_nums = [math.floor(i * total / sum(rand_floats)) for i in rand_floats]
+    for _ in range(total - sum(rand_nums)):
+        rand_nums[random.randint(0, n-1)] += 1
+    return rand_nums
+
+
+def random_flow_allocation(demands):
+    flows = {str(i): [] for i in range(1, len(demands) + 1)}
+    for index, demand in enumerate(demands):
+        h_d = demand.get('h_d')
+        n = len(demand.get('paths'))
+        flows[str(index + 1)] = random_sum(n, h_d)
+
+    return flows
+
+
 def main():
     non_complex, demands, links = read_file('OPT-1 net4.txt')
     print("Finished reading")
+    print(random_sum(3, 5))
+    flows = random_flow_allocation(demands)
+    print("Generated random flow allocation")
 
 
 if __name__ == "__main__":
