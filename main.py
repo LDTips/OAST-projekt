@@ -99,7 +99,7 @@ def random_flow_allocation(demands):
 
 
 def calculate_link_loads(flows, demands, links):
-    loads = {str(i): None for i in range(1, len(demands) + 1)}
+    loads = {str(i): None for i in range(1, len(links) + 1)}
     flows_arr = []
     demands_arr = []
     for i in flows.values():
@@ -115,13 +115,44 @@ def calculate_link_loads(flows, demands, links):
     return loads
 
 
+def calculate_link_overloads(loads, links, module_cap):
+    overloads = {str(i): None for i in range(1, len(links) + 1)}
+    capacities = [module_cap * int(link.get('module_count')) for link in links]
+
+    for index, (load, capacity) in enumerate(zip(loads.values(), capacities)):
+        overloads[str(index + 1)] = int(load) - capacity
+
+    return overloads
+
+
+def main_loop(non_complex, demands, links):
+    limit = 50
+    min_f = float('inf')
+    iter_without_improvement = 0
+    while True:
+        flows = random_flow_allocation(demands)
+        loads = calculate_link_loads(flows, demands, links)
+        overloads = calculate_link_overloads(loads, links, non_complex.get('module_capacity'))
+
+        new_min = max(overloads.values())
+        if new_min < min_f:
+            min_f = new_min
+            best_overload = overloads
+            iter_without_improvement = 0
+
+        iter_without_improvement += 1
+        if iter_without_improvement >= limit:
+            return best_overload, min_f
+
+
 def main():
     non_complex, demands, links = read_file('OPT-1 net4.txt')
-    print("Finished reading")
-    print(random_sum(3, 5))
-    flows = random_flow_allocation(demands)
-    print("Generated random flow allocation")
-    calculate_link_loads(flows, demands, links)
+    print("Finished reading file")
+
+    ol, min_f = main_loop(non_complex, demands, links)
+    print(ol)
+    print(min_f)
+
 
 
 if __name__ == "__main__":
