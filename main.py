@@ -124,8 +124,7 @@ def calculate_link_overloads(loads, links, module_cap):
 
     return overloads
 
-def crossover(parent1_flows, parent2_flows):
-    crossover_probability = 0.5
+def crossover(parent1_flows, parent2_flows, crossover_probability):
     offspring1_flows = {str(i): [] for i in range(1, len(parent1_flows) + 1)}
     offspring2_flows = {str(i): [] for i in range(1, len(parent1_flows) + 1)}
     for i in offspring1_flows:
@@ -137,7 +136,19 @@ def crossover(parent1_flows, parent2_flows):
             offspring2_flows[i] = parent2_flows[i]
     return offspring1_flows, offspring2_flows
 
+def mutate(flows, mutation_probability):
+    for i in flows:
+        if random.random() <= mutation_probability:
+            decreased_index = random.randint(0, len(flows[i]) - 1)
+            increased_index = random.randint(0, len(flows[i]) - 1)
+            while increased_index == decreased_index: # To shift one unit from one path to another indexes must be different
+                increased_index = random.randint(1, len(flows[i]))
+            flows[i][decreased_index]-=1
+            flows[i][increased_index]+=1
+
 def main_loop(non_complex, demands, links):
+    crossover_probability = 0.5
+    mutation_probability = 0.1
     limit = 50
     min_f = float('inf')
     iter_without_improvement = 0
