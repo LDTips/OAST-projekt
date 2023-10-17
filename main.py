@@ -146,6 +146,9 @@ def main_loop(non_complex, demands, links):
 
 
 def main():
+    seed = 10
+    random.seed(seed)
+
     non_complex, demands, links = read_file('OPT-1 net4.txt')
     print("Finished reading file")
 
