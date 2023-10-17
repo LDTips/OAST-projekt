@@ -124,6 +124,18 @@ def calculate_link_overloads(loads, links, module_cap):
 
     return overloads
 
+def crossover(parent1_flows, parent2_flows):
+    crossover_probability = 0.5
+    offspring1_flows = {str(i): [] for i in range(1, len(parent1_flows) + 1)}
+    offspring2_flows = {str(i): [] for i in range(1, len(parent1_flows) + 1)}
+    for i in offspring1_flows:
+        if random.random() <= crossover_probability:
+            offspring1_flows[i] = parent2_flows[i]
+            offspring2_flows[i] = parent1_flows[i]
+        else:
+            offspring1_flows[i] = parent1_flows[i]
+            offspring2_flows[i] = parent2_flows[i]
+    return offspring1_flows, offspring2_flows
 
 def main_loop(non_complex, demands, links):
     limit = 50
