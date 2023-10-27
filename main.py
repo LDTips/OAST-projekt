@@ -88,7 +88,7 @@ def random_sum(n, total):
     return rand_nums
 
 
-def random_flow_allocation(demands):
+def random_chromosome(demands):
     flows = {str(i): [] for i in range(1, len(demands) + 1)}
     for index, demand in enumerate(demands):
         h_d = demand.get('h_d')
@@ -136,6 +136,7 @@ def crossover(parent1_flows, parent2_flows, crossover_probability):
             offspring2_flows[i] = parent2_flows[i]
     return offspring1_flows, offspring2_flows
 
+
 def mutate(flows, mutation_probability):
     for i in flows:
         if random.random() <= mutation_probability:
@@ -143,17 +144,23 @@ def mutate(flows, mutation_probability):
             increased_index = random.randint(0, len(flows[i]) - 1)
             while increased_index == decreased_index: # To shift one unit from one path to another indexes must be different
                 increased_index = random.randint(1, len(flows[i]))
-            flows[i][decreased_index]-=1
-            flows[i][increased_index]+=1
+            flows[i][decreased_index] -= 1
+            flows[i][increased_index] += 1
 
-def main_loop(non_complex, demands, links):
+def generate_start_population(population_length, demands):
+    start_population = []
+    while len(start_population) < population_length:
+        start_population.append(random_chromosome(demands))
+    return start_population
+
+def old_main_loop(non_complex, demands, links):
     crossover_probability = 0.5
     mutation_probability = 0.1
     limit = 50
     min_f = float('inf')
     iter_without_improvement = 0
     while True:
-        flows = random_flow_allocation(demands)
+        flows = random_chromosome(demands)
         loads = calculate_link_loads(flows, demands, links)
         overloads = calculate_link_overloads(loads, links, non_complex.get('module_capacity'))
 
@@ -167,17 +174,24 @@ def main_loop(non_complex, demands, links):
         if iter_without_improvement >= limit:
             return best_overload, min_f
 
+def main_loop(demands):
+    population_length = 1000
+    starting_population = generate_start_population(population_length, demands)
+
 
 def main():
     seed = 10
     random.seed(seed)
 
     non_complex, demands, links = read_file('OPT-1 net4.txt')
+    print(demands)
     print("Finished reading file")
 
-    ol, min_f = main_loop(non_complex, demands, links)
-    print(ol)
-    print(min_f)
+    # ol, min_f = old_main_loop(non_complex, demands, links)
+    # print(ol)
+    # print(min_f)
+
+    main_loop(demands)
 
 
 
