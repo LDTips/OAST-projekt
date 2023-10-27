@@ -153,6 +153,18 @@ def generate_start_population(population_length, demands):
         start_population.append(random_chromosome(demands))
     return start_population
 
+def find_best_objective_function(chromosomes, demands, links, module_capacity):
+    best_objective_function = float('inf')
+    best_chromosome = {}
+    for chromosome in chromosomes:
+        loads = calculate_link_loads(chromosome, demands, links)
+        overloads = calculate_link_overloads(loads, links, module_capacity)
+        objective_function = max(overloads.values())
+        if objective_function < best_objective_function:
+            best_objective_function = objective_function
+            best_chromosome = chromosome
+    return best_objective_function, best_chromosome
+
 def old_main_loop(non_complex, demands, links):
     crossover_probability = 0.5
     mutation_probability = 0.1
@@ -174,13 +186,24 @@ def old_main_loop(non_complex, demands, links):
         if iter_without_improvement >= limit:
             return best_overload, min_f
 
-def main_loop(demands):
+
+def main_loop(non_complex, demands, links):
     population_length = 1000
+    simulation_limit = 100
+    iter_without_improvement = 0
+    current_generation = 0
     starting_population = generate_start_population(population_length, demands)
+    while True:
+        next_generation = []
+        current_generation += 1
+        starting_best_objective_function = find_best_objective_function(starting_population, demands, links, non_complex.get('module_capacity'))
+        iter_without_improvement += 1
+        if iter_without_improvement >= simulation_limit:
+            return
 
 
 def main():
-    seed = 10
+    seed = 2077
     random.seed(seed)
 
     non_complex, demands, links = read_file('OPT-1 net4.txt')
@@ -191,7 +214,7 @@ def main():
     # print(ol)
     # print(min_f)
 
-    main_loop(demands)
+    main_loop(non_complex, demands, links)
 
 
 
