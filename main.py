@@ -165,6 +165,19 @@ def find_best_objective_function(chromosomes, demands, links, module_capacity):
             best_chromosome = chromosome
     return best_objective_function, best_chromosome
 
+
+def find_worst_objective_function(chromosomes, demands, links, module_capacity):
+    worst_objective_function = -float('inf')
+    worst_chromosome = {}
+    for chromosome in chromosomes:
+        loads = calculate_link_loads(chromosome, demands, links)
+        overloads = calculate_link_overloads(loads, links, module_capacity)
+        objective_function = max(overloads.values())
+        if objective_function > worst_objective_function:
+            worst_objective_function = objective_function
+            worst_chromosome = chromosome
+    return worst_chromosome
+
 def old_main_loop(non_complex, demands, links):
     crossover_probability = 0.5
     mutation_probability = 0.1
@@ -215,6 +228,11 @@ def main_loop(non_complex, demands, links):
                 next_generation.append(parents_generation[i+1])
             i += 2
 
+        # we need to remove chromosome because we have 1001 chromosome in next generation
+        next_generation.remove(find_worst_objective_function(next_generation, demands, links, non_complex.get('module_capacity')))
+
+        #TO DO:
+        return
 
         iter_without_improvement += 1
         if iter_without_improvement >= simulation_limit:
