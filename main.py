@@ -124,17 +124,17 @@ def calculate_link_overloads(loads, links, module_cap):
 
     return overloads
 
-def crossover(parent1_flows, parent2_flows, crossover_probability):
-    offspring1_flows = {str(i): [] for i in range(1, len(parent1_flows) + 1)}
-    offspring2_flows = {str(i): [] for i in range(1, len(parent1_flows) + 1)}
-    for i in offspring1_flows:
+def crossover(parent1, parent2, crossover_probability):
+    offspring1 = {str(i): [] for i in range(1, len(parent1) + 1)}
+    offspring2 = {str(i): [] for i in range(1, len(parent1) + 1)}
+    for i in offspring1:
         if random.random() <= crossover_probability:
-            offspring1_flows[i] = parent2_flows[i]
-            offspring2_flows[i] = parent1_flows[i]
+            offspring1[i] = parent2[i]
+            offspring2[i] = parent1[i]
         else:
-            offspring1_flows[i] = parent1_flows[i]
-            offspring2_flows[i] = parent2_flows[i]
-    return offspring1_flows, offspring2_flows
+            offspring1[i] = parent1[i]
+            offspring2[i] = parent2[i]
+    return offspring1, offspring2
 
 
 def mutate(flows, mutation_probability):
@@ -147,9 +147,9 @@ def mutate(flows, mutation_probability):
             flows[i][decreased_index] -= 1
             flows[i][increased_index] += 1
 
-def generate_start_population(population_length, demands):
+def generate_start_population(population_size, demands):
     start_population = []
-    while len(start_population) < population_length:
+    while len(start_population) < population_size:
         start_population.append(random_chromosome(demands))
     return start_population
 
@@ -188,15 +188,34 @@ def old_main_loop(non_complex, demands, links):
 
 
 def main_loop(non_complex, demands, links):
-    population_length = 1000
+    population_size = 1000
     simulation_limit = 100
+    crossover_occur_probability = 0.2
+    crossover_probability = 0.5
     iter_without_improvement = 0
     current_generation = 0
-    starting_population = generate_start_population(population_length, demands)
+    parents_generation = generate_start_population(population_size, demands)
+    best_solutions = []
     while True:
         next_generation = []
         current_generation += 1
-        starting_best_objective_function = find_best_objective_function(starting_population, demands, links, non_complex.get('module_capacity'))
+        starting_best_objective_function, starting_best_chromosome = find_best_objective_function(parents_generation, demands, links, non_complex.get('module_capacity'))
+        next_generation.append(starting_best_chromosome)
+        best_solutions.append(starting_best_chromosome)
+
+        # crossover criteria - crossover occur probability
+        i = 0
+        while i < len(parents_generation):
+            if random.random() <= crossover_occur_probability:
+                offspring1, offspring2 = crossover(parents_generation[i], parents_generation[i+1], crossover_probability)
+                next_generation.append(offspring1)
+                next_generation.append(offspring2)
+            else:
+                next_generation.append(parents_generation[i])
+                next_generation.append(parents_generation[i+1])
+            i += 2
+
+
         iter_without_improvement += 1
         if iter_without_improvement >= simulation_limit:
             return
