@@ -147,7 +147,7 @@ def mutate(chromosomes, mutation_probability):
                     continue
                 increased_index = random.randint(0, len(chromosome[i]) - 1)
                 while increased_index == decreased_index: # To shift one unit from one path to another indexes must be different
-                    increased_index = random.randint(1, len(chromosome[i]))
+                    increased_index = random.randint(0, len(chromosome[i]) - 1)
                 chromosome[i][decreased_index] -= 1
                 chromosome[i][increased_index] += 1
 
@@ -182,26 +182,26 @@ def find_worst_objective_function(chromosomes, demands, links, module_capacity):
             worst_chromosome = chromosome
     return worst_chromosome
 
-def old_main_loop(non_complex, demands, links):
-    crossover_probability = 0.5
-    mutation_probability = 0.1
-    limit = 50
-    min_f = float('inf')
-    iter_without_improvement = 0
-    while True:
-        flows = random_chromosome(demands)
-        loads = calculate_link_loads(flows, demands, links)
-        overloads = calculate_link_overloads(loads, links, non_complex.get('module_capacity'))
-
-        new_min = max(overloads.values())
-        if new_min < min_f:
-            min_f = new_min
-            best_overload = overloads
-            iter_without_improvement = 0
-
-        iter_without_improvement += 1
-        if iter_without_improvement >= limit:
-            return best_overload, min_f
+# def old_main_loop(non_complex, demands, links):
+#     crossover_probability = 0.5
+#     mutation_probability = 0.1
+#     limit = 50
+#     min_f = float('inf')
+#     iter_without_improvement = 0
+#     while True:
+#         flows = random_chromosome(demands)
+#         loads = calculate_link_loads(flows, demands, links)
+#         overloads = calculate_link_overloads(loads, links, non_complex.get('module_capacity'))
+#
+#         new_min = max(overloads.values())
+#         if new_min < min_f:
+#             min_f = new_min
+#             best_overload = overloads
+#             iter_without_improvement = 0
+#
+#         iter_without_improvement += 1
+#         if iter_without_improvement >= limit:
+#             return best_overload, min_f
 
 
 def main_loop(non_complex, demands, links):
@@ -217,9 +217,9 @@ def main_loop(non_complex, demands, links):
     while True:
         next_generation = []
         current_generation += 1
-        starting_best_objective_function, starting_best_chromosome = find_best_objective_function(parents_generation, demands, links, non_complex.get('module_capacity'))
-        next_generation.append(copy.deepcopy(starting_best_chromosome))
-        best_solutions.append(copy.deepcopy(starting_best_chromosome))
+        current_best_objective_function, current_best_chromosome = find_best_objective_function(parents_generation, demands, links, non_complex.get('module_capacity'))
+        next_generation.append(copy.deepcopy(current_best_chromosome))
+        best_solutions.append(copy.deepcopy(current_best_chromosome))
 
         # crossover criteria - crossover occur probability
         i = 0
@@ -239,12 +239,16 @@ def main_loop(non_complex, demands, links):
         # mutation criteria - mutation probability - may be more than one mutation per chromosome
         mutate(next_generation, mutation_probability)
 
-        # TODO
-        return
+        next_generation_best_objective_function, next_generation_best_chromosome = find_best_objective_function(next_generation, demands, links, non_complex.get('module_capacity'))
+        if next_generation_best_objective_function >= current_best_objective_function:
+            iter_without_improvement += 1
+        else:
+            iter_without_improvement = 0
 
-        iter_without_improvement += 1
+        parents_generation = next_generation
+
         if iter_without_improvement >= simulation_limit:
-            return
+            return find_best_objective_function(best_solutions, demands, links, non_complex.get('module_capacity'))
 
 
 def main():
@@ -255,13 +259,10 @@ def main():
     print(demands)
     print("Finished reading file")
 
-    # ol, min_f = old_main_loop(non_complex, demands, links)
-    # print(ol)
-    # print(min_f)
-
-    main_loop(non_complex, demands, links)
-
-
+    min_f, best_solution = main_loop(non_complex, demands, links)
+    print("Simulation finished")
+    print("Best solution:", best_solution)
+    print("Objective function:", min_f)
 
 if __name__ == "__main__":
     main()
