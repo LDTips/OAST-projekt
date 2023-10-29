@@ -1,3 +1,4 @@
+import copy
 import random
 import math
 
@@ -137,15 +138,18 @@ def crossover(parent1, parent2, crossover_probability):
     return offspring1, offspring2
 
 
-def mutate(flows, mutation_probability):
-    for i in flows:
-        if random.random() <= mutation_probability:
-            decreased_index = random.randint(0, len(flows[i]) - 1)
-            increased_index = random.randint(0, len(flows[i]) - 1)
-            while increased_index == decreased_index: # To shift one unit from one path to another indexes must be different
-                increased_index = random.randint(1, len(flows[i]))
-            flows[i][decreased_index] -= 1
-            flows[i][increased_index] += 1
+def mutate(chromosomes, mutation_probability):
+    for chromosome in chromosomes:
+        for i in chromosome:
+            if random.random() <= mutation_probability:
+                decreased_index = random.randint(0, len(chromosome[i]) - 1)
+                if chromosome[i][decreased_index] == 0:
+                    continue
+                increased_index = random.randint(0, len(chromosome[i]) - 1)
+                while increased_index == decreased_index: # To shift one unit from one path to another indexes must be different
+                    increased_index = random.randint(1, len(chromosome[i]))
+                chromosome[i][decreased_index] -= 1
+                chromosome[i][increased_index] += 1
 
 def generate_start_population(population_size, demands):
     start_population = []
@@ -205,6 +209,7 @@ def main_loop(non_complex, demands, links):
     simulation_limit = 100
     crossover_occur_probability = 0.2
     crossover_probability = 0.5
+    mutation_probability = 0.05
     iter_without_improvement = 0
     current_generation = 0
     parents_generation = generate_start_population(population_size, demands)
@@ -213,8 +218,8 @@ def main_loop(non_complex, demands, links):
         next_generation = []
         current_generation += 1
         starting_best_objective_function, starting_best_chromosome = find_best_objective_function(parents_generation, demands, links, non_complex.get('module_capacity'))
-        next_generation.append(starting_best_chromosome)
-        best_solutions.append(starting_best_chromosome)
+        next_generation.append(copy.deepcopy(starting_best_chromosome))
+        best_solutions.append(copy.deepcopy(starting_best_chromosome))
 
         # crossover criteria - crossover occur probability
         i = 0
@@ -228,10 +233,13 @@ def main_loop(non_complex, demands, links):
                 next_generation.append(parents_generation[i+1])
             i += 2
 
-        # we need to remove chromosome because we have 1001 chromosome in next generation
+        # we need to remove chromosome because we have "population_size+1" chromosome in next generation
         next_generation.remove(find_worst_objective_function(next_generation, demands, links, non_complex.get('module_capacity')))
 
-        #TO DO:
+        # mutation criteria - mutation probability - may be more than one mutation per chromosome
+        mutate(next_generation, mutation_probability)
+
+        # TODO
         return
 
         iter_without_improvement += 1
