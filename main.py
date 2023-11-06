@@ -94,6 +94,17 @@ def generate_start_population(population_size, demands):
     return start_population
 
 
+def find_objective_functions(chromosomes, demands, links, module_capacity):
+    funs = []
+    for chromosome in chromosomes:
+        loads = calculate_links_loads(chromosome, demands, links)
+        overloads = calculate_links_overloads(loads, links, module_capacity)
+        objective_function = max(overloads.values())
+        funs.append(objective_function)
+
+    return funs
+
+
 def find_best_objective_function_dap(chromosomes, demands, links, module_capacity):
     best_objective_function = float('inf')
     best_chromosome = {}
@@ -177,12 +188,17 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
         best_solutions.append(copy.deepcopy(current_best_chromosome))
 
         # crossover criteria - crossover occur probability
+        objective_funs = find_objective_functions(parents_generation, demands, links, module_capacity)
+        worst_fun_val = max(objective_funs)
+        # Worst functions need to have lowest weight, highest the highest. hence the reverse of values
+        weights = [worst_fun_val - i for i in objective_funs]
         for i in range(0, population_size, 2):
-            if random.random() <= crossover_occur_probability:
-                offspring1, offspring2 = crossover(parents_generation[i], parents_generation[i + 1],
-                                                   crossover_probability)
-                parents_generation[i] = offspring1
-                parents_generation[i + 1] = offspring2
+            parent1, parent2 = random.choices(parents_generation, weights, k=2)
+            offspring1, offspring2 = crossover(parent1, parent2, 1)
+
+            i1, i2 = parents_generation.index(parent1), parents_generation.index(parent2)
+            parents_generation[i1] = offspring1
+            parents_generation[i2] = offspring2
 
         # we need to remove chromosome because we have "population_size+1" chromosome in next generation
         parents_generation.remove(
