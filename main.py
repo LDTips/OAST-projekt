@@ -194,48 +194,51 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
     current_generation_number = 0
 
     parents_generation = generate_start_population(population_size, demands)
-    best_solutions = []
     while True:
         current_generation_number += 1
-        current_best_objective_function, current_best_chromosome = \
-            find_best_objective_function_dap(parents_generation, demands, links, module_capacity)
-        best_solutions.append(copy.deepcopy(current_best_chromosome))
-
-        # crossover criteria - crossover occur probability
         objective_funs = find_objective_functions_dap(parents_generation, demands, links, module_capacity)
-        worst_fun_val = max(objective_funs)
+        current_best_objective_function, worst_fun_val = min(objective_funs), max(objective_funs)
+        current_best_chromosome = parents_generation[objective_funs.index(min(objective_funs))]
+
         # Worst functions need to have lowest weight, highest the highest. hence the reverse of values
         weights = [worst_fun_val - i for i in objective_funs]
-        crossover_chromosomes = []
-        for i in range(0, population_size, 2):
+        children = []
+        for _ in range(0, population_size, 2):
             if random.random() <= crossover_occur_probability:
                 parent1, parent2 = random.choices(parents_generation, weights, k=2)
                 offspring1, offspring2 = crossover(parent1, parent2, crossover_probability)
-                crossover_chromosomes.append(offspring1)
-                crossover_chromosomes.append(offspring2)
+                children.append(offspring1)
+                children.append(offspring2)
 
-        parents_generation += crossover_chromosomes
-
-        # we need to remove chromosomes because we have "population_size + crossover" chromosomes in next generation
-        while len(parents_generation) > population_size - 1:
-            parents_generation.remove(
-                find_worst_objective_function_dap(parents_generation, demands, links, module_capacity))
+        parents_generation += children
+        # Parents have changed - recalculate objective functions
+        objective_funs += find_objective_functions_dap(children, demands, links, module_capacity)
+        # we remove the worst chromosomes because we have "population_size + crossover" chromosomes in next generation
+        for _ in range(len(parents_generation) - population_size - 1):
+            worst_fun_val = max(objective_funs)
+            i = objective_funs.index(worst_fun_val)
+            del objective_funs[i]  # Removes by index rather than by value
+            del parents_generation[i]  # Remove corresponding bad chromosome, based on the worst fun value
 
         # mutation criteria
         mutate(parents_generation, mutation_occur_probability, mutation_probability)
 
         # add the best chromosome to next generation
         parents_generation.append(current_best_chromosome)
+        objective_funs.append(current_best_objective_function)
+        # find new best chromosome after crossovers
+        next_generation_best_objective_function = min(objective_funs)
+        next_generation_best_chromosome = parents_generation[objective_funs.index(min(objective_funs))]
 
-        next_generation_best_objective_function, next_generation_best_chromosome = \
-            find_best_objective_function_dap(parents_generation, demands, links, module_capacity)
+        # Check if new generation is better than the previous
         if next_generation_best_objective_function >= current_best_objective_function:
             iter_without_improvement += 1
         else:
             iter_without_improvement = 0
 
         if iter_without_improvement >= simulation_limit:
-            return find_best_objective_function_dap(best_solutions, demands, links, module_capacity)
+            # return find_best_objective_function_dap(best_solutions, demands, links, module_capacity)
+            return next_generation_best_chromosome, next_generation_best_objective_function
 
 
 def calculate_ddap(demands, links, module_capacity, population_size, simulation_limit,
@@ -245,48 +248,52 @@ def calculate_ddap(demands, links, module_capacity, population_size, simulation_
     current_generation_number = 0
 
     parents_generation = generate_start_population(population_size, demands)
-    best_solutions = []
     while True:
         current_generation_number += 1
-        current_best_objective_function, current_best_chromosome = \
-            find_best_objective_function_ddap(parents_generation, demands, links, module_capacity)
-        best_solutions.append(copy.deepcopy(current_best_chromosome))
-
-        # crossover criteria - crossover occur probability
         objective_funs = find_objective_functions_ddap(parents_generation, demands, links, module_capacity)
-        worst_fun_val = max(objective_funs)
-        # Worst functions need to have lowest weight, highest the highest. hence the reverse of values
+        current_best_objective_function, worst_fun_val = min(objective_funs), max(objective_funs)
+        current_best_chromosome = parents_generation[objective_funs.index(current_best_objective_function)]
+
         weights = [worst_fun_val - i for i in objective_funs]
-        crossover_chromosomes = []
-        for i in range(0, population_size, 2):
+        children = []
+        for _ in range(0, population_size, 2):
             if random.random() <= crossover_occur_probability:
                 parent1, parent2 = random.choices(parents_generation, weights, k=2)
                 offspring1, offspring2 = crossover(parent1, parent2, crossover_probability)
-                crossover_chromosomes.append(offspring1)
-                crossover_chromosomes.append(offspring2)
+                children.append(offspring1)
+                children.append(offspring2)
+        parents_generation += children
 
-        parents_generation += crossover_chromosomes
+        # Parents have changed - recalculate objective functions
+        objective_funs += find_objective_functions_ddap(children, demands, links, module_capacity)
 
-        # we need to remove chromosomes because we have "population_size + crossover" chromosomes in next generation
-        while len(parents_generation) > population_size - 1:
-            parents_generation.remove(
-                find_worst_objective_function_ddap(parents_generation, demands, links, module_capacity))
+        # we remove the worst chromosomes because we have "population_size + crossover" chromosomes in next generation
+        for _ in range(len(parents_generation) - population_size - 1):
+            worst_fun_val = max(objective_funs)
+            i = objective_funs.index(worst_fun_val)
+            del objective_funs[i]  # Removes by index rather than by value
+            del parents_generation[i]  # Remove corresponding bad chromosome, based on the worst fun value
 
         # mutation criteria
         mutate(parents_generation, mutation_occur_probability, mutation_probability)
 
         # add the best chromosome to next generation
         parents_generation.append(current_best_chromosome)
+        objective_funs.append(current_best_objective_function)
 
-        next_generation_best_objective_function, next_generation_best_chromosome = \
-            find_best_objective_function_ddap(parents_generation, demands, links, module_capacity)
+        # find new best chromosome after crossovers
+        next_generation_best_objective_function = min(objective_funs)
+        next_generation_best_chromosome = parents_generation[objective_funs.index(min(objective_funs))]
+
+        # Check if new generation is better than the previous
         if next_generation_best_objective_function >= current_best_objective_function:
             iter_without_improvement += 1
         else:
             iter_without_improvement = 0
 
         if iter_without_improvement >= simulation_limit:
-            return find_best_objective_function_ddap(best_solutions, demands, links, module_capacity)
+            # return find_best_objective_function_ddap(best_solutions, demands, links, module_capacity)
+            return next_generation_best_objective_function, next_generation_best_chromosome
 
 
 def main_loop(non_complex, demands, links):
