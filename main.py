@@ -94,7 +94,7 @@ def generate_start_population(population_size, demands):
     return start_population
 
 
-def find_objective_functions(chromosomes, demands, links, module_capacity):
+def find_objective_functions_dap(chromosomes, demands, links, module_capacity):
     funs = []
     for chromosome in chromosomes:
         loads = calculate_links_loads(chromosome, demands, links)
@@ -173,6 +173,18 @@ def find_worst_objective_function_ddap(chromosomes, demands, links, module_capac
     return worst_chromosome
 
 
+def find_objective_functions_ddap(chromosomes, demands, links, module_capacity):
+    funs = []
+    for chromosome in chromosomes:
+        loads = calculate_links_loads(chromosome, demands, links)
+        links_size = calculate_links_size(loads, links, module_capacity)
+        objective_function = 0
+        for i in range(len(links)):
+            objective_function += links_size[str(i + 1)] * int(links[i].get('module_cost'))
+        funs.append(objective_function)
+    return funs
+
+
 def calculate_dap(demands, links, module_capacity, population_size, simulation_limit,
                   crossover_occur_probability, crossover_probability, mutation_probability):
     iter_without_improvement = 0
@@ -188,7 +200,7 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
         best_solutions.append(copy.deepcopy(current_best_chromosome))
 
         # crossover criteria - crossover occur probability
-        objective_funs = find_objective_functions(parents_generation, demands, links, module_capacity)
+        objective_funs = find_objective_functions_dap(parents_generation, demands, links, module_capacity)
         worst_fun_val = max(objective_funs)
         # Worst functions need to have lowest weight, highest the highest. hence the reverse of values
         weights = [worst_fun_val - i for i in objective_funs]
@@ -287,7 +299,7 @@ def main():
 
     non_complex, demands, links = read_file('OPT-1 net4.txt')
     print("Finished reading file:")
-    print('\t',demands)
+    print('\t', demands)
 
     main_loop(non_complex, demands, links)
 
