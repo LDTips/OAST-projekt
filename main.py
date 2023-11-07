@@ -70,20 +70,22 @@ def crossover(parent1, parent2, crossover_probability):
     return offspring1, offspring2
 
 
-def mutate(chromosomes, mutation_probability):
+def mutate(chromosomes, mutation_occur_probability, mutation_probability):
     for chromosome in chromosomes:
-        for gene in chromosome:
-            if random.random() <= mutation_probability:
-                decreased_index = random.randint(0, len(chromosome[gene]) - 1)
-                while chromosome[gene][decreased_index] == 0:  # We can't have negative values
+        if random.random() <= mutation_occur_probability:
+            gene_to_mutate = random.randint(1, len(chromosome))
+            for gene in chromosome:
+                if random.random() <= mutation_probability or gene_to_mutate == int(gene):
                     decreased_index = random.randint(0, len(chromosome[gene]) - 1)
+                    while chromosome[gene][decreased_index] == 0:  # We can't have negative values
+                        decreased_index = random.randint(0, len(chromosome[gene]) - 1)
 
-                increased_index = random.randint(0, len(chromosome[gene]) - 1)
-                while increased_index == decreased_index:  # To shift one unit from one path to another indexes must be different
                     increased_index = random.randint(0, len(chromosome[gene]) - 1)
+                    while increased_index == decreased_index:  # To shift one unit from one path to another indexes must be different
+                        increased_index = random.randint(0, len(chromosome[gene]) - 1)
 
-                chromosome[gene][decreased_index] -= 1
-                chromosome[gene][increased_index] += 1
+                    chromosome[gene][decreased_index] -= 1
+                    chromosome[gene][increased_index] += 1
 
 
 def generate_start_population(population_size, demands):
@@ -146,7 +148,7 @@ def find_best_objective_function_ddap(chromosomes, demands, links, module_capaci
         links_size = calculate_links_size(loads, links, module_capacity)
         objective_function = 0
         for i in range(len(links)):
-            objective_function += links_size[str(i+1)] * int(links[i].get('module_cost'))
+            objective_function += links_size[str(i + 1)] * int(links[i].get('module_cost'))
 
         if objective_function < best_objective_function:
             best_objective_function = objective_function
@@ -186,7 +188,8 @@ def find_objective_functions_ddap(chromosomes, demands, links, module_capacity):
 
 
 def calculate_dap(demands, links, module_capacity, population_size, simulation_limit,
-                  crossover_occur_probability, crossover_probability, mutation_probability):
+                  crossover_occur_probability, crossover_probability,
+                  mutation_occur_probability, mutation_probability):
     iter_without_improvement = 0
     current_generation_number = 0
 
@@ -216,8 +219,8 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
         parents_generation.remove(
             find_worst_objective_function_dap(parents_generation, demands, links, module_capacity))
 
-        # mutation criteria - mutation probability - may be more than one mutation per chromosome
-        mutate(parents_generation, mutation_probability)
+        # mutation criteria
+        mutate(parents_generation, mutation_occur_probability, mutation_probability)
 
         next_generation_best_objective_function, next_generation_best_chromosome = \
             find_best_objective_function_dap(parents_generation, demands, links, module_capacity)
@@ -231,7 +234,8 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
 
 
 def calculate_ddap(demands, links, module_capacity, population_size, simulation_limit,
-                   crossover_occur_probability, crossover_probability, mutation_probability):
+                   crossover_occur_probability, crossover_probability,
+                   mutation_occur_probability, mutation_probability):
     iter_without_improvement = 0
     current_generation_number = 0
 
@@ -256,8 +260,8 @@ def calculate_ddap(demands, links, module_capacity, population_size, simulation_
         parents_generation.remove(
             find_worst_objective_function_ddap(parents_generation, demands, links, module_capacity))
 
-        # mutation criteria - mutation probability - may be more than one mutation per chromosome
-        mutate(parents_generation, mutation_probability)
+        # mutation criteria
+        mutate(parents_generation, mutation_occur_probability, mutation_probability)
 
         next_generation_best_objective_function, next_generation_best_chromosome = \
             find_best_objective_function_ddap(parents_generation, demands, links, module_capacity)
@@ -276,17 +280,20 @@ def main_loop(non_complex, demands, links):
     module_capacity = non_complex.get('module_capacity')
     crossover_occur_probability = 0.2
     crossover_probability = 0.5
-    mutation_probability = 0.05
+    mutation_occur_probability = 0.25  # mutation on chromosome
+    mutation_probability = 0.05  # mutation on more than one gene
 
     min_f, best_solution = calculate_dap(demands, links, module_capacity, population_size, simulation_limit,
-                                         crossover_occur_probability, crossover_probability, mutation_probability)
+                                         crossover_occur_probability, crossover_probability,
+                                         mutation_occur_probability, mutation_probability)
 
     print("Simulation finished - DAP:")
     print("\t Best solution:", best_solution)
     print("\t Objective function:", min_f)
 
     min_f, best_solution = calculate_ddap(demands, links, module_capacity, population_size, simulation_limit,
-                                          crossover_occur_probability, crossover_probability, mutation_probability)
+                                          crossover_occur_probability, crossover_probability,
+                                          mutation_occur_probability, mutation_probability)
 
     print("Simulation finished - DDAP:")
     print("\t Best solution:", best_solution)
