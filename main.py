@@ -207,13 +207,17 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
         worst_fun_val = max(objective_funs)
         # Worst functions need to have lowest weight, highest the highest. hence the reverse of values
         weights = [worst_fun_val - i for i in objective_funs]
-        for i in range(0, population_size, 2):
-            parent1, parent2 = random.choices(parents_generation, weights, k=2)
-            offspring1, offspring2 = crossover(parent1, parent2, crossover_probability)
 
-            i1, i2 = parents_generation.index(parent1), parents_generation.index(parent2)
-            parents_generation[i1] = offspring1
-            parents_generation[i2] = offspring2
+        next_generation = copy.deepcopy(parents_generation)
+        # TODO: doopanować tuti, wywalawać po krosie, dodawać do next_generation
+        for i in range(0, population_size, 2):
+            if random.random() <= crossover_occur_probability:
+                parent1, parent2 = random.choices(parents_generation, weights, k=2)
+                offspring1, offspring2 = crossover(parent1, parent2, crossover_probability)
+
+                i1, i2 = parents_generation.index(parent1), parents_generation.index(parent2)
+                parents_generation[i1] = offspring1
+                parents_generation[i2] = offspring2
 
         # we need to remove chromosome because we have "population_size+1" chromosome in next generation
         parents_generation.remove(
