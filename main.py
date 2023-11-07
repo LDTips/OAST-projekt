@@ -2,7 +2,7 @@ import copy
 import random
 import math
 from read_file import read_file
-
+from time import perf_counter
 
 def random_sum(n, total):
     rand_floats = [random.random() for _ in range(n)]
@@ -305,21 +305,27 @@ def main_loop(non_complex, demands, links):
     mutation_occur_probability = 0.25  # mutation on chromosome
     mutation_probability = 0.05  # mutation on more than one gene
 
+    t1 = perf_counter()
     min_f, best_solution = calculate_dap(demands, links, module_capacity, population_size, simulation_limit,
                                          crossover_occur_probability, crossover_probability,
                                          mutation_occur_probability, mutation_probability)
-
+    t2 = perf_counter()
+    t_delta = t2 - t1
     print("Simulation finished - DAP:")
-    print("\t Best solution:", best_solution)
-    print("\t Objective function:", min_f)
+    print("\t Best solution: ", best_solution)
+    print("\t Objective function: ", min_f)
+    print(f"\t Time elapsed: {t_delta:.4f} s")
 
+    t1 = perf_counter()
     min_f, best_solution = calculate_ddap(demands, links, module_capacity, population_size, simulation_limit,
                                           crossover_occur_probability, crossover_probability,
                                           mutation_occur_probability, mutation_probability)
-
+    t2 = perf_counter()
+    t_delta = t2 - t1
     print("Simulation finished - DDAP:")
     print("\t Best solution:", best_solution)
     print("\t Objective function:", min_f)
+    print(f"\t Time elapsed: {t_delta:.4f} s")
 
 
 def main():
