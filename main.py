@@ -199,7 +199,6 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
         current_generation_number += 1
         current_best_objective_function, current_best_chromosome = \
             find_best_objective_function_dap(parents_generation, demands, links, module_capacity)
-        parents_generation.append(copy.deepcopy(current_best_chromosome))  # duplicate the best chromosome
         best_solutions.append(copy.deepcopy(current_best_chromosome))
 
         # crossover criteria - crossover occur probability
@@ -248,20 +247,27 @@ def calculate_ddap(demands, links, module_capacity, population_size, simulation_
         current_generation_number += 1
         current_best_objective_function, current_best_chromosome = \
             find_best_objective_function_ddap(parents_generation, demands, links, module_capacity)
-        parents_generation.append(copy.deepcopy(current_best_chromosome))  # duplicate the best chromosome
         best_solutions.append(copy.deepcopy(current_best_chromosome))
 
         # crossover criteria - crossover occur probability
+        objective_funs = find_objective_functions_ddap(parents_generation, demands, links, module_capacity)
+        worst_fun_val = max(objective_funs)
+        # Worst functions need to have lowest weight, highest the highest. hence the reverse of values
+        weights = [worst_fun_val - i for i in objective_funs]
+        crossover_chromosomes = []
         for i in range(0, population_size, 2):
             if random.random() <= crossover_occur_probability:
-                offspring1, offspring2 = crossover(parents_generation[i], parents_generation[i + 1],
-                                                   crossover_probability)
-                parents_generation[i] = offspring1
-                parents_generation[i + 1] = offspring2
+                parent1, parent2 = random.choices(parents_generation, weights, k=2)
+                offspring1, offspring2 = crossover(parent1, parent2, crossover_probability)
+                crossover_chromosomes.append(offspring1)
+                crossover_chromosomes.append(offspring2)
 
-        # we need to remove chromosome because we have "population_size+1" chromosome in next generation
-        parents_generation.remove(
-            find_worst_objective_function_ddap(parents_generation, demands, links, module_capacity))
+        parents_generation += crossover_chromosomes
+
+        # we need to remove chromosomes because we have "population_size + best + crossover" chromosomes in next generation
+        while len(parents_generation) > population_size:
+            parents_generation.remove(
+                find_worst_objective_function_ddap(parents_generation, demands, links, module_capacity))
 
         # mutation criteria
         mutate(parents_generation, mutation_occur_probability, mutation_probability)
