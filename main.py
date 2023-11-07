@@ -198,7 +198,7 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
         current_generation_number += 1
         objective_funs = find_objective_functions_dap(parents_generation, demands, links, module_capacity)
         current_best_objective_function, worst_fun_val = min(objective_funs), max(objective_funs)
-        current_best_chromosome = parents_generation[objective_funs.index(min(objective_funs))]
+        current_best_chromosome = copy.deepcopy(parents_generation[objective_funs.index(min(objective_funs))])
 
         # Worst functions need to have lowest weight, highest the highest. hence the reverse of values
         weights = [worst_fun_val - i for i in objective_funs]
@@ -214,7 +214,7 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
         # Parents have changed - recalculate objective functions
         objective_funs += find_objective_functions_dap(children, demands, links, module_capacity)
         # we remove the worst chromosomes because we have "population_size + crossover" chromosomes in next generation
-        for _ in range(len(parents_generation) - population_size - 1):
+        for _ in range(len(parents_generation) - population_size + 1):
             worst_fun_val = max(objective_funs)
             i = objective_funs.index(worst_fun_val)
             del objective_funs[i]  # Removes by index rather than by value
@@ -252,7 +252,7 @@ def calculate_ddap(demands, links, module_capacity, population_size, simulation_
         current_generation_number += 1
         objective_funs = find_objective_functions_ddap(parents_generation, demands, links, module_capacity)
         current_best_objective_function, worst_fun_val = min(objective_funs), max(objective_funs)
-        current_best_chromosome = parents_generation[objective_funs.index(current_best_objective_function)]
+        current_best_chromosome = copy.deepcopy(parents_generation[objective_funs.index(min(objective_funs))])
 
         weights = [worst_fun_val - i for i in objective_funs]
         children = []
@@ -268,7 +268,7 @@ def calculate_ddap(demands, links, module_capacity, population_size, simulation_
         objective_funs += find_objective_functions_ddap(children, demands, links, module_capacity)
 
         # we remove the worst chromosomes because we have "population_size + crossover" chromosomes in next generation
-        for _ in range(len(parents_generation) - population_size - 1):
+        for _ in range(len(parents_generation) - population_size + 1):
             worst_fun_val = max(objective_funs)
             i = objective_funs.index(worst_fun_val)
             del objective_funs[i]  # Removes by index rather than by value
