@@ -238,7 +238,7 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
 
         if iter_without_improvement >= simulation_limit:
             # return find_best_objective_function_dap(best_solutions, demands, links, module_capacity)
-            return next_generation_best_objective_function, next_generation_best_chromosome
+            return next_generation_best_objective_function, next_generation_best_chromosome, current_generation_number
 
 
 def calculate_ddap(demands, links, module_capacity, population_size, simulation_limit,
@@ -293,7 +293,7 @@ def calculate_ddap(demands, links, module_capacity, population_size, simulation_
 
         if iter_without_improvement >= simulation_limit:
             # return find_best_objective_function_ddap(best_solutions, demands, links, module_capacity)
-            return next_generation_best_objective_function, next_generation_best_chromosome
+            return next_generation_best_objective_function, next_generation_best_chromosome, current_generation_number
 
 
 def main_loop(non_complex, demands, links):
@@ -306,18 +306,19 @@ def main_loop(non_complex, demands, links):
     mutation_probability = 0.05  # mutation on more than one gene
 
     t1 = perf_counter()
-    min_f, best_solution = calculate_dap(demands, links, module_capacity, population_size, simulation_limit,
+    min_f, best_solution, generation_number = calculate_dap(demands, links, module_capacity, population_size, simulation_limit,
                                          crossover_occur_probability, crossover_probability,
                                          mutation_occur_probability, mutation_probability)
     t2 = perf_counter()
     t_delta = t2 - t1
     print("Simulation finished - DAP:")
-    print("\t Best solution: ", best_solution)
-    print("\t Objective function: ", min_f)
+    print("\t Best solution:", best_solution)
+    print("\t Objective function:", min_f)
     print(f"\t Time elapsed: {t_delta:.4f} s")
+    print("\t Number of generations:", generation_number)
 
     t1 = perf_counter()
-    min_f, best_solution = calculate_ddap(demands, links, module_capacity, population_size, simulation_limit,
+    min_f, best_solutio, generation_number = calculate_ddap(demands, links, module_capacity, population_size, simulation_limit,
                                           crossover_occur_probability, crossover_probability,
                                           mutation_occur_probability, mutation_probability)
     t2 = perf_counter()
@@ -326,6 +327,7 @@ def main_loop(non_complex, demands, links):
     print("\t Best solution:", best_solution)
     print("\t Objective function:", min_f)
     print(f"\t Time elapsed: {t_delta:.4f} s")
+    print("\t Number of generations:", generation_number)
 
 
 def main():
