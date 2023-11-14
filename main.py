@@ -238,7 +238,7 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
 
         if iter_without_improvement >= simulation_limit:
             # return find_best_objective_function_dap(best_solutions, demands, links, module_capacity)
-            return next_generation_best_chromosome, next_generation_best_objective_function
+            return next_generation_best_objective_function, next_generation_best_chromosome
 
 
 def calculate_ddap(demands, links, module_capacity, population_size, simulation_limit,
