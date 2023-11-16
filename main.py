@@ -126,9 +126,9 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
     current_generation_number = 0
 
     parents_generation = generate_start_population(population_size, demands)
+    objective_funs = find_objective_functions_dap(parents_generation, demands, links, module_capacity)
     while True:
         current_generation_number += 1
-        objective_funs = find_objective_functions_dap(parents_generation, demands, links, module_capacity)
         current_best_objective_function, worst_fun_val = min(objective_funs), max(objective_funs)
         current_best_chromosome = copy.deepcopy(parents_generation[objective_funs.index(min(objective_funs))])
 
@@ -154,7 +154,7 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
 
         # mutation criteria
         mutate(parents_generation, mutation_occur_probability, mutation_probability)
-
+        objective_funs = find_objective_functions_dap(parents_generation, demands, links, module_capacity)
         # add the best chromosome to next generation
         parents_generation.append(current_best_chromosome)
         objective_funs.append(current_best_objective_function)
@@ -169,7 +169,6 @@ def calculate_dap(demands, links, module_capacity, population_size, simulation_l
             iter_without_improvement = 0
 
         if iter_without_improvement >= simulation_limit:
-            # return find_best_objective_function_dap(best_solutions, demands, links, module_capacity)
             return next_generation_best_objective_function, next_generation_best_chromosome, current_generation_number
 
 
@@ -180,9 +179,9 @@ def calculate_ddap(demands, links, module_capacity, population_size, simulation_
     current_generation_number = 0
 
     parents_generation = generate_start_population(population_size, demands)
+    objective_funs = find_objective_functions_ddap(parents_generation, demands, links, module_capacity)
     while True:
         current_generation_number += 1
-        objective_funs = find_objective_functions_ddap(parents_generation, demands, links, module_capacity)
         current_best_objective_function, worst_fun_val = min(objective_funs), max(objective_funs)
         current_best_chromosome = copy.deepcopy(parents_generation[objective_funs.index(min(objective_funs))])
 
@@ -208,7 +207,7 @@ def calculate_ddap(demands, links, module_capacity, population_size, simulation_
 
         # mutation criteria
         mutate(parents_generation, mutation_occur_probability, mutation_probability)
-
+        objective_funs = find_objective_functions_ddap(parents_generation, demands, links, module_capacity)
         # add the best chromosome to next generation
         parents_generation.append(current_best_chromosome)
         objective_funs.append(current_best_objective_function)
@@ -224,7 +223,6 @@ def calculate_ddap(demands, links, module_capacity, population_size, simulation_
             iter_without_improvement = 0
 
         if iter_without_improvement >= simulation_limit:
-            # return find_best_objective_function_ddap(best_solutions, demands, links, module_capacity)
             return next_generation_best_objective_function, next_generation_best_chromosome, current_generation_number
 
 
