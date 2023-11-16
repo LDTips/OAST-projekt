@@ -250,7 +250,7 @@ def main_loop(non_complex, demands, links):
     print("\t Number of generations:", generation_number)
 
     t1 = perf_counter()
-    min_f, best_solutio, generation_number = calculate_ddap(demands, links, module_capacity, population_size, simulation_limit,
+    min_f, best_solution, generation_number = calculate_ddap(demands, links, module_capacity, population_size, simulation_limit,
                                           crossover_occur_probability, crossover_probability,
                                           mutation_occur_probability, mutation_probability)
     t2 = perf_counter()
